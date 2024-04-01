@@ -3,9 +3,9 @@
 const int AirQualitySensorPin = A0;
 const int AirQualityValidPin = 2;
 const int HumidityTempPin = 3;
-const int SoilMoisturePin = A1;
-const int MoistureValidPin = 4;
-const int MoistureSensorPowerPin = 5;
+const int SoilHumidityPin = A1;
+const int SoilLectureValidPin = 4;
+const int SoilSensorPowerPin = 5;
 // refresh rate in ms
 const int RefreshRate = 5*1000;
 
@@ -15,16 +15,14 @@ int particlesFound;
 DHT dht(HumidityTempPin, DHT11);
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   dht.begin();
 
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(MoistureSensorPowerPin, OUTPUT);
+  pinMode(SoilSensorPowerPin, OUTPUT);
 
   pinMode(AirQualitySensorPin, INPUT);
-  pinMode(MoistureValidPin, INPUT);
-
+  pinMode(SoilLectureValidPin, INPUT);
 }
 
 void getPPM() {
@@ -52,13 +50,13 @@ void getAirInfo() {
 
 void getSoilInfo() {
   // turn on the sensor only when using to avoid corrosion
-  digitalWrite(MoistureSensorPowerPin, HIGH);
+  digitalWrite(SoilSensorPowerPin, HIGH);
   delay(10);
 
-  int soilMoisture = analogRead(SoilMoisturePin);
-  int isValid = digitalRead(MoistureValidPin);
+  int soilMoisture = analogRead(SoilHumidityPin);
+  int isValid = digitalRead(SoilLectureValidPin);
 
-  digitalWrite(MoistureSensorPowerPin, LOW);
+  digitalWrite(SoilSensorPowerPin, LOW);
 
   if (isValid) {
     Serial.print("Soil moisture:");
@@ -69,10 +67,11 @@ void getSoilInfo() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
   getPPM();
   getAirInfo();
   getSoilInfo();
+
+  Serial.flush();
   
   delay(RefreshRate);
 }
