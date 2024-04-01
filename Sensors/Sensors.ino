@@ -1,13 +1,15 @@
 #include "DHT.h"
 
 const int AirQualitySensorPin = A0;
-const int GasPresencePin = 2;
-const int DhtPin = 3;
+const int AirQualityValidPin = 2;
+const int HumidityTempPin = 3;
+const int SoilMoisturePin = A1;
+const int MoistureValidPin = 4;
 
 int airQualityData;
 int particlesFound;
 
-DHT dht(DhtPin, DHT11);
+DHT dht(HumidityTempPin, DHT11);
 
 void setup() {
   // put your setup code here, to run once:
@@ -15,11 +17,12 @@ void setup() {
   dht.begin();
   pinMode(AirQualitySensorPin, INPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(MoistureValidPin, INPUT);
 }
 
 void getPPM() {
   airQualityData = analogRead(AirQualitySensorPin);
-  particlesFound = digitalRead(GasPresencePin);
+  particlesFound = digitalRead(AirQualityValidPin);
 
   if (particlesFound) {
     Serial.print(airQualityData, DEC);
@@ -40,10 +43,23 @@ void getAirInfo() {
   Serial.println(temperature);
 }
 
+void getSoilInfo() {
+  int soilMoisture = analogRead(SoilMoisturePin);
+  int isValid = digitalRead(MoistureValidPin);
+
+  if (isValid) {
+    Serial.print("Soil moisture:");
+    Serial.println(soilMoisture);
+  } else {
+    Serial.println("Soil moisture error");
+  }
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
   getPPM();
   getAirInfo();
+  getSoilInfo();
   
   digitalWrite(LED_BUILTIN, HIGH);
   delay(500);
