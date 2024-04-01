@@ -5,6 +5,9 @@ const int AirQualityValidPin = 2;
 const int HumidityTempPin = 3;
 const int SoilMoisturePin = A1;
 const int MoistureValidPin = 4;
+const int MoistureSensorPowerPin = 5;
+// refresh rate in ms
+const int RefreshRate = 5*1000;
 
 int airQualityData;
 int particlesFound;
@@ -15,9 +18,13 @@ void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
   dht.begin();
-  pinMode(AirQualitySensorPin, INPUT);
+
   pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(MoistureSensorPowerPin, OUTPUT);
+
+  pinMode(AirQualitySensorPin, INPUT);
   pinMode(MoistureValidPin, INPUT);
+
 }
 
 void getPPM() {
@@ -44,8 +51,14 @@ void getAirInfo() {
 }
 
 void getSoilInfo() {
+  // turn on the sensor only when using to avoid corrosion
+  digitalWrite(MoistureSensorPowerPin, HIGH);
+  delay(10);
+
   int soilMoisture = analogRead(SoilMoisturePin);
   int isValid = digitalRead(MoistureValidPin);
+
+  digitalWrite(MoistureSensorPowerPin, LOW);
 
   if (isValid) {
     Serial.print("Soil moisture:");
@@ -61,9 +74,5 @@ void loop() {
   getAirInfo();
   getSoilInfo();
   
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(500);
-
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(500);
+  delay(RefreshRate);
 }
