@@ -9,9 +9,6 @@ const int SoilSensorPowerPin = 5;
 // refresh rate in ms
 const int RefreshRate = 5*1000;
 
-int airQualityData;
-int particlesFound;
-
 DHT dht(HumidityTempPin, DHT11);
 
 void setup() {
@@ -25,51 +22,56 @@ void setup() {
   pinMode(SoilLectureValidPin, INPUT);
 }
 
-void getPPM() {
-  airQualityData = analogRead(AirQualitySensorPin);
-  particlesFound = digitalRead(AirQualityValidPin);
+// return -1 if data is invalid
+int getPPM() {
+  int particlesFound = digitalRead(AirQualityValidPin);
 
   if (particlesFound) {
-    Serial.print(airQualityData, DEC);
-    Serial.println("PPM");  
+    return analogRead(AirQualitySensorPin);
   } else {
-    Serial.println("No particles found");
+    return -1;
   }
 }
 
-void getAirInfo() {
-  float airHumidity = dht.readHumidity();
-  float temperature = dht.readTemperature();
-
-  Serial.print("Humidity:");
-  Serial.println(airHumidity);
-
-  Serial.print("Temperature:");
-  Serial.println(temperature);
+// return NaN if data is invalid
+float getAirHumidity() {
+  return dht.readHumidity();
 }
 
-void getSoilInfo() {
+// return NaN if data is invalid
+float getTemperature() {
+  return dht.readTemperature();
+}
+
+int getSoilHumidity() {
   // turn on the sensor only when using to avoid corrosion
   digitalWrite(SoilSensorPowerPin, HIGH);
   delay(10);
 
-  int soilMoisture = analogRead(SoilHumidityPin);
   int isValid = digitalRead(SoilLectureValidPin);
 
   digitalWrite(SoilSensorPowerPin, LOW);
 
   if (isValid) {
-    Serial.print("Soil moisture:");
-    Serial.println(soilMoisture);
+    return analogRead(SoilHumidityPin);
   } else {
-    Serial.println("Soil moisture error");
+    return -1;
   }
 }
 
 void loop() {
-  getPPM();
-  getAirInfo();
-  getSoilInfo();
+  int ppm = getPPM();
+  float airHumidity = getAirHumidity();
+  float temp = getTemperature();
+  int soilHumidity = getSoilHumidity();
+
+  Serial.print(ppm); 
+  Serial.print(" "); 
+  Serial.print(airHumidity); 
+  Serial.print(" "); 
+  Serial.print(temp); 
+  Serial.print(" "); 
+  Serial.println(soilHumidity); 
 
   Serial.flush();
   
