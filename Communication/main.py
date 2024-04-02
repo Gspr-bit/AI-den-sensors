@@ -1,14 +1,14 @@
 from serial import Serial
 import json
 
-def send_to_db(json_data):
+def send_message(json_data):
     pass
 
 
 def main():
     arduino = Serial('/dev/ttyACM0', 9600)
     
-    # first line is trash
+    # first line is garbage
     arduino.readline()
 
     while True:
@@ -23,7 +23,7 @@ def main():
             'soilHumidity': values[3],
         }
 
-        send_to_db(json.dumps(dict))
+        send_message(json.dumps(dict))
 
 
 if __name__ == "__main__":
